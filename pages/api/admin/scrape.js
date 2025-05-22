@@ -15,7 +15,8 @@ export default async function handler(req, res) {
   const sampleProducts = [
     {
       title: "LED Galaxy Projector",
-      thumbnail: "https://i.imgur.com/G8QZ6Rn.jpeg",
+      thumbnail: thumbnail: "https://m.media-amazon.com/images/I/61+J2Y+f2gL._AC_SL1500_.jpg",
+
       videoUrl: "https://www.tiktok.com/@example/video/123456789",
       niche: "Home Decor",
       stats: {
@@ -26,7 +27,8 @@ export default async function handler(req, res) {
     },
     {
       title: "Portable Smoothie Blender",
-      thumbnail: "https://i.imgur.com/e1YFwpb.jpeg",
+      thumbnail: thumbnail: "https://m.media-amazon.com/images/I/71zFeUtwEaL._AC_SL1500_.jpg",
+
       videoUrl: "https://www.tiktok.com/@example/video/987654321",
       niche: "Kitchen",
       stats: {
