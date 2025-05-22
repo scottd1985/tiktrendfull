@@ -11,7 +11,8 @@ export default async function handler(req, res) {
   const db = client.db("tiktrend");
   const collection = db.collection("products");
 
-  const hashtag = "temu"; // You can change this to any hashtag
+  const hashtag = "tiktokmademebuyit";
+
   const url = `https://scraptik.p.rapidapi.com/feed/search?keyword=%23${hashtag}`;
 
   try {
