@@ -16,7 +16,8 @@ export default async function handler(req, res) {
     return res.status(200).json({ message: "Database cleared." });
   }
 
-  const hashtag = "tiktokmademebuyit";
+  const hashtags = ["viralfinds", "dropshipping", "amazonfinds"];
+
   const url = `https://scraptik.p.rapidapi.com/feed/search?keyword=%23${hashtag}`;
 
   try {
