@@ -1,7 +1,7 @@
 import clientPromise from "../../../lib/mongodb";
 
 export default async function handler(req, res) {
-  const { token } = req.query;
+  const { token, clear } = req.query;
 
   if (token !== process.env.ADMIN_TOKEN) {
     return res.status(401).json({ message: "Unauthorized" });
@@ -11,8 +11,13 @@ export default async function handler(req, res) {
   const db = client.db("tiktrend");
   const collection = db.collection("products");
 
+  if (clear === "1") {
+    await collection.deleteMany({});
+    return res.status(200).json({ message: "Database cleared." });
+  }
+
   const hashtag = "tiktokmademebuyit";
-const url = `https://scraptik.p.rapidapi.com/feed/search?keyword=%23${hashtag}`;
+  const url = `https://scraptik.p.rapidapi.com/feed/search?keyword=%23${hashtag}`;
 
   try {
     const response = await fetch(url, {
@@ -38,7 +43,7 @@ const url = `https://scraptik.p.rapidapi.com/feed/search?keyword=%23${hashtag}`;
     }));
 
     if (!products || products.length === 0) {
-      return res.status(200).json({ message: "No results returned from TikTok" });
+      return res.status(200).json({ message: "No results returned from TikTok." });
     }
 
     await collection.deleteMany({});
@@ -46,7 +51,7 @@ const url = `https://scraptik.p.rapidapi.com/feed/search?keyword=%23${hashtag}`;
 
     res.status(200).json({ message: `Scraped and saved ${products.length} TikTok products.` });
   } catch (error) {
-    console.log("TikTok raw data:", data);
+    console.error("Scraper error:", error);
     res.status(500).json({ message: "Scraping failed.", error: error.message });
   }
 }
