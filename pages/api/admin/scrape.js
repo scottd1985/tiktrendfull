@@ -17,42 +17,50 @@ export default async function handler(req, res) {
   }
 
   const hashtags = ["viralfinds", "dropshipping", "amazonfinds"];
+  let finalProducts = [];
+  let usedHashtag = "";
 
-  const url = `https://scraptik.p.rapidapi.com/feed/search?keyword=%23${hashtag}`;
+  for (let tag of hashtags) {
+    const url = `https://scraptik.p.rapidapi.com/feed/search?keyword=%23${tag}`;
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "X-RapidAPI-Key": process.env.RAPIDAPI_KEY,
+          "X-RapidAPI-Host": "scraptik.p.rapidapi.com",
+        },
+      });
 
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "X-RapidAPI-Key": process.env.RAPIDAPI_KEY,
-        "X-RapidAPI-Host": "scraptik.p.rapidapi.com",
-      },
-    });
+      const data = await response.json();
 
-    const data = await response.json();
+      const products = data?.data?.slice(0, 10).map((item) => ({
+        title: item.desc || "Untitled",
+        thumbnail: item.video?.cover || "",
+        videoUrl: `https://www.tiktok.com/@${item.author?.uniqueId}/video/${item.id}`,
+        niche: tag,
+        stats: {
+          likes: item.stats?.diggCount || 0,
+          views: item.stats?.playCount || 0,
+          shares: item.stats?.shareCount || 0,
+        },
+      }));
 
-    const products = data?.data?.slice(0, 10).map((item) => ({
-      title: item.desc || "Untitled",
-      thumbnail: item.video?.cover || "",
-      videoUrl: `https://www.tiktok.com/@${item.author?.uniqueId}/video/${item.id}`,
-      niche: hashtag,
-      stats: {
-        likes: item.stats?.diggCount || 0,
-        views: item.stats?.playCount || 0,
-        shares: item.stats?.shareCount || 0,
-      },
-    }));
-
-    if (!products || products.length === 0) {
-      return res.status(200).json({ message: "No results returned from TikTok." });
+      if (products.length > 0) {
+        finalProducts = products;
+        usedHashtag = tag;
+        break;
+      }
+    } catch (err) {
+      console.log(`Tag ${tag} failed`, err.message);
     }
-
-    await collection.deleteMany({});
-    await collection.insertMany(products);
-
-    res.status(200).json({ message: `Scraped and saved ${products.length} TikTok products.` });
-  } catch (error) {
-    console.error("Scraper error:", error);
-    res.status(500).json({ message: "Scraping failed.", error: error.message });
   }
+
+  if (finalProducts.length === 0) {
+    return res.status(200).json({ message: "No TikTok results from any hashtag." });
+  }
+
+  await collection.deleteMany({});
+  await collection.insertMany(finalProducts);
+
+  res.status(200).json({ message: `Scraped ${finalProducts.length} TikTok products from #${usedHashtag}` });
 }
