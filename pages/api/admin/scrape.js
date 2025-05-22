@@ -11,12 +11,14 @@ export default async function handler(req, res) {
   const db = client.db("tiktrend");
   const collection = db.collection("products");
 
-  // Sample fake product data (until real scraper is added)
+  // Replace old data
+  await collection.deleteMany({});
+
+  // New sample products with working images
   const sampleProducts = [
     {
       title: "LED Galaxy Projector",
-      thumbnail: thumbnail: "https://m.media-amazon.com/images/I/61+J2Y+f2gL._AC_SL1500_.jpg",
-
+      thumbnail: "https://m.media-amazon.com/images/I/71zFeUtwEaL._AC_SL1500_.jpg",
       videoUrl: "https://www.tiktok.com/@example/video/123456789",
       niche: "Home Decor",
       stats: {
@@ -27,8 +29,7 @@ export default async function handler(req, res) {
     },
     {
       title: "Portable Smoothie Blender",
-      thumbnail: thumbnail: "https://m.media-amazon.com/images/I/71zFeUtwEaL._AC_SL1500_.jpg",
-
+      thumbnail: "https://m.media-amazon.com/images/I/61+J2Y+f2gL._AC_SL1500_.jpg",
       videoUrl: "https://www.tiktok.com/@example/video/987654321",
       niche: "Kitchen",
       stats: {
@@ -39,8 +40,7 @@ export default async function handler(req, res) {
     }
   ];
 
-  await collection.deleteMany({}); // Clear old data
-  await collection.insertMany(sampleProducts); // Insert new products
+  await collection.insertMany(sampleProducts);
 
   res.status(200).json({ message: "Products added to MongoDB!" });
 }
