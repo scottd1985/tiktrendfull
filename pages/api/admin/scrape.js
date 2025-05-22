@@ -12,7 +12,6 @@ export default async function handler(req, res) {
   const collection = db.collection("products");
 
   const hashtag = "tiktokmademebuyit";
-
   const url = `https://scraptik.p.rapidapi.com/feed/search?keyword=%23${hashtag}`;
 
   try {
@@ -47,7 +46,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({ message: `Scraped and saved ${products.length} TikTok products.` });
   } catch (error) {
-    console.error("Scraper error:", error);
+    console.log("TikTok raw data:", data);
     res.status(500).json({ message: "Scraping failed.", error: error.message });
   }
 }
