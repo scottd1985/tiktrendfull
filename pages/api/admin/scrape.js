@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   const collection = db.collection("products");
 
   const hashtag = "tiktokmademebuyit";
-  const url = `https://scraptik.p.rapidapi.com/feed/search?keyword=%23${hashtag}`;
+const url = `https://scraptik.p.rapidapi.com/feed/search?keyword=%23${hashtag}`;
 
   try {
     const response = await fetch(url, {
