@@ -11,36 +11,42 @@ export default async function handler(req, res) {
   const db = client.db("tiktrend");
   const collection = db.collection("products");
 
-  // Replace old data
-  await collection.deleteMany({});
+  const hashtag = "temu"; // You can change this to any hashtag
+  const url = `https://scraptik.p.rapidapi.com/feed/search?keyword=%23${hashtag}`;
 
-  // New sample products with working images
-  const sampleProducts = [
-    {
-      title: "LED Galaxy Projector",
-      thumbnail: "https://m.media-amazon.com/images/I/71zFeUtwEaL._AC_SL1500_.jpg",
-      videoUrl: "https://www.tiktok.com/@example/video/123456789",
-      niche: "Home Decor",
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "X-RapidAPI-Key": process.env.RAPIDAPI_KEY,
+        "X-RapidAPI-Host": "scraptik.p.rapidapi.com",
+      },
+    });
+
+    const data = await response.json();
+
+    const products = data?.data?.slice(0, 10).map((item) => ({
+      title: item.desc || "Untitled",
+      thumbnail: item.video?.cover || "",
+      videoUrl: `https://www.tiktok.com/@${item.author?.uniqueId}/video/${item.id}`,
+      niche: hashtag,
       stats: {
-        likes: 5123,
-        views: 20456,
-        shares: 122
-      }
-    },
-    {
-      title: "Portable Smoothie Blender",
-      thumbnail: "https://m.media-amazon.com/images/I/61+J2Y+f2gL._AC_SL1500_.jpg",
-      videoUrl: "https://www.tiktok.com/@example/video/987654321",
-      niche: "Kitchen",
-      stats: {
-        likes: 6341,
-        views: 31823,
-        shares: 268
-      }
+        likes: item.stats?.diggCount || 0,
+        views: item.stats?.playCount || 0,
+        shares: item.stats?.shareCount || 0,
+      },
+    }));
+
+    if (!products || products.length === 0) {
+      return res.status(200).json({ message: "No results returned from TikTok" });
     }
-  ];
 
-  await collection.insertMany(sampleProducts);
+    await collection.deleteMany({});
+    await collection.insertMany(products);
 
-  res.status(200).json({ message: "Products added to MongoDB!" });
+    res.status(200).json({ message: `Scraped and saved ${products.length} TikTok products.` });
+  } catch (error) {
+    console.error("Scraper error:", error);
+    res.status(500).json({ message: "Scraping failed.", error: error.message });
+  }
 }
